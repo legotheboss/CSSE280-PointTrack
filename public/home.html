@@ -61,38 +61,23 @@
         </div>
         <div class="modal-body">
           <div class="form-group bmd-form-group">
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-align: left;">
-                Dropdown button
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">American Express</a>
-                <a class="dropdown-item" href="#">Another action</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-              </div>
-            </div>
+            <select class="custom-select" id="account-type">
+              <option selected>Account Type</option>
+              <option value="amexMR">American Express Membership Rewards</option>
+              <option value="citiTYP">Citi ThankYou Rewards</option>
+              <option value="chaseUMR">Chase Ultimate Rewards</option>
+              <option value="boaPR">Bank of America Premier Rewards</option>
+              <option value="discoverCR">Discover Card Rewards</option>
+              <!-- document.querySelector("#account-type").selectedOptions[0].value -->
+            </select>
           </div>
           <div class="form-group bmd-form-group">
-            <label for="inputQuote" class="bmd-label-floating">Quote</label>
-            <input type="text" class="form-control" id="inputQuote">
-          </div>
-          <div class="form-group bmd-form-group">
-            <label for="inputMovie" class="bmd-label-floating">Movie</label>
+            <label for="inputMovie" class="bmd-label-floating">Point Balance</label>
             <input type="text" class="form-control" id="inputMovie">
-            <span class="bmd-help">What movie is this quote from?</span>
+          </div>
+          <div class="form-group bmd-form-group">
+            <label for="inputQuote" class="bmd-label-floating">Date</label>
+            <input type="text" class="form-control" id="inputQuote">
           </div>
         </div>
         <div class="modal-footer">

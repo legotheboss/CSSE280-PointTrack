@@ -1,13 +1,16 @@
 var rhit = rhit || {};
 
-rhit.FB_COLLECTION_MOVIEQUOTE = "pointtrack";
+rhit.FB_COLLECTION_RewardAccount = "pointtrack";
 rhit.FB_KEY_QUOTE = "quote";
 rhit.FB_KEY_MOVIE = "movie";
+rhit.FB_KEY_CARD = "accountType";
 rhit.FB_KEY_LAST_TOUCHED = "lastTouched";
 rhit.KEY_UID = "uid";
-rhit.fbMovieQuotesManager = null;
-rhit.fbSingleQuoteManager = null;
+rhit.fbRewardAccountsManager = null;
+rhit.fbSingleAccountManager = null;
 rhit.fbAuthManager = null;
+
+const accountEnums = Object.freeze({"amexMR":"American Express Membership Rewards", "citiTYP":"Citi ThankYou Rewards", "chaseUMR":"Chase Ultimate Rewards", "boaPR":"Bank of America Premier Rewards", "discoverCR":"Discover Card Rewards"});
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
 function htmlToElement(html) {
@@ -38,7 +41,8 @@ rhit.ListPageController = class {
 		document.querySelector("#submitAddQuote").addEventListener("click", (event) => {
 			const quote = document.querySelector("#inputQuote").value;
 			const movie = document.querySelector("#inputMovie").value;
-			rhit.fbMovieQuotesManager.add(quote, movie);
+			const cardAccount = document.querySelector("#account-type").selectedOptions[0].value;
+			rhit.fbRewardAccountsManager.add(quote, movie, cardAccount);
 		});
 
 		
@@ -54,7 +58,7 @@ rhit.ListPageController = class {
 		});
 
 		// Start listening!
-		rhit.fbMovieQuotesManager.beginListening(this.updateList.bind(this));
+		rhit.fbRewardAccountsManager.beginListening(this.updateList.bind(this));
 
 	}
 
@@ -64,19 +68,19 @@ rhit.ListPageController = class {
 		document.querySelector("#nameBadge").innerHTML = `Welcome, ${rhit.fbAuthManager._user.displayName}!`;
 
 		console.log("I need to update the list on the page!");
-		console.log(`Num quotes = ${rhit.fbMovieQuotesManager.length}`);
-		console.log("Example quote = ", rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(0));
+		console.log(`Num quotes = ${rhit.fbRewardAccountsManager.length}`);
+		console.log("Example quote = ", rhit.fbRewardAccountsManager.getRewardAccountAtIndex(0));
 
 		// Make a new quoteListContainer
 		const newList = htmlToElement('<div id="quoteListContainer"></div>');
 		// Fill the quoteListContainer with quote cards using a loop
-		for (let i = 0; i < rhit.fbMovieQuotesManager.length; i++) {
-			const mq = rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(i);
+		for (let i = 0; i < rhit.fbRewardAccountsManager.length; i++) {
+			const mq = rhit.fbRewardAccountsManager.getRewardAccountAtIndex(i);
 			const newCard = this._createCard(mq);
 			newCard.onclick = (event) => {
 				//console.log(`You clicked on ${mq.id}`);
-				// rhit.storage.setMovieQuoteId(mq.id);
-				window.location.href = `/moviequote.html?id=${mq.id}`;
+				// rhit.storage.setRewardAccountId(mq.id);
+				window.location.href = `/RewardAccount.html?id=${mq.id}`;
 			};
 			newList.appendChild(newCard);
 		}
@@ -90,38 +94,41 @@ rhit.ListPageController = class {
 		oldList.parentElement.appendChild(newList);
 	}
 
-	_createCard(movieQuote) {
+	_createCard(RewardAccount) {
 		return htmlToElement(`<div class="card">
 		<div class="card-body">
-			<h5 class="card-title">${movieQuote.quote}</h5>
-			<h6 class="card-subtitle mb-2 text-muted">${movieQuote.movie}</h6>
+			<h5 class="card-title">${eval("accountEnums."+RewardAccount.accountType)}</h5>
+			<h6 class="card-subtitle mb-2 text-muted">${RewardAccount.movie}</h6>
+			<h6 class="card-subtitle mb-2 text-muted">${RewardAccount.quote}</h6>
 		</div>
 	</div>`);
 	}
 
 }
 
-rhit.MovieQuote = class {
-	constructor(id, quote, movie) {
+rhit.RewardAccount = class {
+	constructor(id, quote, movie, accountType) {
 		this.id = id;
 		this.quote = quote;
 		this.movie = movie;
+		this.accountType = accountType;
 	}
 }
 
-rhit.FbMovieQuotesManager = class {
+rhit.FbRewardAccountsManager = class {
 	constructor(uid) {
 		this._uid = uid;
 		this._documentSnapshots = [];
-		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_MOVIEQUOTE);
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RewardAccount);
 		this._unsubscribe = null;
 	}
 
-	add(quote, movie) {
+	add(quote, movie, cardAccount) {
 		// Add a new document with a generated id.
 		this._ref.add({
 				[rhit.FB_KEY_QUOTE]: quote,
 				[rhit.FB_KEY_MOVIE]: movie,
+				[rhit.FB_KEY_CARD]: cardAccount,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
 				[rhit.KEY_UID]: rhit.fbAuthManager.uid,
 			})
@@ -141,7 +148,7 @@ rhit.FbMovieQuotesManager = class {
 		}
 
 		this._unsubscribe = query.onSnapshot((querySnapshot) => {
-			console.log("MovieQuote update!");
+			console.log("RewardAccount update!");
 			this._documentSnapshots = querySnapshot.docs;
 			// querySnapshot.forEach((doc) => {
 			// 	console.log(doc.data());
@@ -160,11 +167,12 @@ rhit.FbMovieQuotesManager = class {
 		return this._documentSnapshots.length;
 	}
 
-	getMovieQuoteAtIndex(index) {
+	getRewardAccountAtIndex(index) {
 		const docSnapshot = this._documentSnapshots[index];
-		const mq = new rhit.MovieQuote(docSnapshot.id,
+		const mq = new rhit.RewardAccount(docSnapshot.id,
 			docSnapshot.get(rhit.FB_KEY_QUOTE),
-			docSnapshot.get(rhit.FB_KEY_MOVIE));
+			docSnapshot.get(rhit.FB_KEY_MOVIE),
+			docSnapshot.get(rhit.FB_KEY_CARD));
 		return mq;
 	}
 }
@@ -178,13 +186,13 @@ rhit.DetailPageController = class {
 		document.querySelector("#submitEditQuote").addEventListener("click", (event) => {
 			const quote = document.querySelector("#inputQuote").value;
 			const movie = document.querySelector("#inputMovie").value;
-			rhit.fbSingleQuoteManager.update(quote, movie);
+			rhit.fbSingleAccountManager.update(quote, movie);
 		});
 
 		$("#editQuoteDialog").on("show.bs.modal", (event) => {
 			// Pre animation
-			document.querySelector("#inputQuote").value = rhit.fbSingleQuoteManager.quote;
-			document.querySelector("#inputMovie").value = rhit.fbSingleQuoteManager.movie;
+			document.querySelector("#inputQuote").value = rhit.fbSingleAccountManager.quote;
+			document.querySelector("#inputMovie").value = rhit.fbSingleAccountManager.movie;
 		});
 		$("#editQuoteDialog").on("shown.bs.modal", (event) => {
 			// Post animation
@@ -192,7 +200,7 @@ rhit.DetailPageController = class {
 		});
 
 		document.querySelector("#submitDeleteQuote").addEventListener("click", (event) => {
-			rhit.fbSingleQuoteManager.delete().then(function () {
+			rhit.fbSingleAccountManager.delete().then(function () {
 				console.log("Document successfully deleted!");
 				window.location.href = "/home.html";
 			}).catch(function (error) {
@@ -200,23 +208,23 @@ rhit.DetailPageController = class {
 			});
 		});
 
-		rhit.fbSingleQuoteManager.beginListening(this.updateView.bind(this));
+		rhit.fbSingleAccountManager.beginListening(this.updateView.bind(this));
 	}
 	updateView() {
-		document.querySelector("#cardQuote").innerHTML = rhit.fbSingleQuoteManager.quote;
-		document.querySelector("#cardMovie").innerHTML = rhit.fbSingleQuoteManager.movie;
-		if (rhit.fbSingleQuoteManager.uid == rhit.fbAuthManager.uid) {
+		document.querySelector("#cardQuote").innerHTML = rhit.fbSingleAccountManager.quote;
+		document.querySelector("#cardMovie").innerHTML = rhit.fbSingleAccountManager.movie;
+		if (rhit.fbSingleAccountManager.uid == rhit.fbAuthManager.uid) {
 			document.querySelector("#menuEdit").style.display = "flex";
 			document.querySelector("#menuDelete").style.display = "flex";
 		}
 	}
 }
 
-rhit.FbSingleQuoteManager = class {
-	constructor(movieQuoteId) {
+rhit.FbSingleAccountManager = class {
+	constructor(RewardAccountId) {
 		this._documentSnapshot = {};
 		this._unsubscribe = null;
-		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_MOVIEQUOTE).doc(movieQuoteId);
+		this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_RewardAccount).doc(RewardAccountId);
 	}
 
 	beginListening(changeListener) {
@@ -237,11 +245,12 @@ rhit.FbSingleQuoteManager = class {
 		this._unsubscribe();
 	}
 
-	update(quote, movie) {
+	update(quote, movie, cardAccount) {
 		this._ref.update({
 				[rhit.FB_KEY_QUOTE]: quote,
 				[rhit.FB_KEY_MOVIE]: movie,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
+				[rhit.FB_KEY_CARD]: cardAccount
 			})
 			.then(() => {
 				console.log("Document successfully updated!");
@@ -268,23 +277,11 @@ rhit.FbSingleQuoteManager = class {
 		return this._documentSnapshot.get(rhit.KEY_UID);
 	}
 
+	get cardAccount() {
+		return this._documentSnapshot.get(rhit.FB_KEY_CARD);
+	}
+
 }
-
-
-// rhit.storage = rhit.storage || {};
-// rhit.storage.MOVIEQUOTE_ID_KEY = "movieQuoteId";
-
-// rhit.storage.getMovieQuoteId = function () {
-// 	const mqId = sessionStorage.getItem(rhit.storage.MOVIEQUOTE_ID_KEY);
-// 	if (!mqId) {
-// 		console.log("No movie quote id in sessionStorage!");
-// 	}
-// 	return mqId;
-// };
-
-// rhit.storage.setMovieQuoteId = function (movieQuoteId) {
-// 	sessionStorage.setItem(rhit.storage.MOVIEQUOTE_ID_KEY, movieQuoteId);
-// };
 
 rhit.FbAuthManager = class {
 	constructor() {
@@ -354,22 +351,22 @@ rhit.initializePage = function () {
 		const uid = urlParams.get('uid');
 		console.log("url parameter = ", uid);
 
-		rhit.fbMovieQuotesManager = new rhit.FbMovieQuotesManager(uid);
+		rhit.fbRewardAccountsManager = new rhit.FbRewardAccountsManager(uid);
 		new rhit.ListPageController();
 	}
 	if (document.querySelector("#detailPage")) {
 		console.log("You are on the detail page.");
-		//const movieQuoteId = rhit.storage.getMovieQuoteId();
+		//const RewardAccountId = rhit.storage.getRewardAccountId();
 
 		const queryString = window.location.search;
 		console.log(queryString);
 		const urlParams = new URLSearchParams(queryString);
-		const movieQuoteId = urlParams.get("id");
+		const RewardAccountId = urlParams.get("id");
 
-		if (!movieQuoteId) {
+		if (!RewardAccountId) {
 			window.location.href = "/";
 		}
-		rhit.fbSingleQuoteManager = new rhit.FbSingleQuoteManager(movieQuoteId);
+		rhit.fbSingleAccountManager = new rhit.FbSingleAccountManager(RewardAccountId);
 		new rhit.DetailPageController();
 	}
 

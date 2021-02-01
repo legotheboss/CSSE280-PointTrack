@@ -35,11 +35,12 @@ body h1 {
 }
 
 .card {
-    margin: 10px 0;
+    margin: 20px 0;
 }
 
 #listPage .card-title,
 #listPage .card-subtitle {
+    color: #6c757d;
     white-space: nowrap;
     overflow: hidden;
     display: block;
