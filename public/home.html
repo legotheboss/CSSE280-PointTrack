@@ -5,30 +5,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+  <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Spartan">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
   <link rel="stylesheet" href="styles/main.css">
-  <title>Movie Quotes</title>
+  <title>Home</title>
 </head>
 
 <body>
   <!-- <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Movie Quotes</a>
+    <a class="navbar-brand" href="#">Point Track</a>
   </nav> -->
 
 
   <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
     <header class="bmd-layout-header">
-      <div class="navbar navbar-dark fixed-top bg-faded justify-content-start">
+      <div class="navbar fixed-top bg-faded justify-content-start">
         <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s2">
           <span class="sr-only">Toggle drawer</span>
           <i class="material-icons">menu</i>
         </button>
-        <a class="navbar-brand" href="#">&nbsp;&nbsp;Movie Quotes</a>
+        <a class="navbar-brand" href="#" style="color: #2F80ED;">&nbsp;&nbsp;Point Track</a>
       </div>
     </header>
     <div id="dw-s2" class="bmd-layout-drawer bg-faded">
       <header>
-        <a class="navbar-brand">Movie Quotes</a>
+        <a class="navbar-brand">Point Track</a>
       </header>
       <ul class="list-group">
         <a id="menuShowAllQuotes" class="list-group-item"><i class="material-icons">people_alt</i>Show all quotes</a>
@@ -38,6 +40,7 @@
     </div>
     <main class="bmd-layout-content">
       <div id="listPage" class="container page-container">
+        <h2 id="nameBadge" style="text-align: left; color: white;">Welcome</h2>
         <div id="quoteListContainer"></div>
       </div>
     </main>
@@ -54,9 +57,34 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add Movie Quote</h5>
+          <h5 class="modal-title">Add Account</h5>
         </div>
         <div class="modal-body">
+          <div class="form-group bmd-form-group">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-align: left;">
+                Dropdown button
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">American Express</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </div>
+          </div>
           <div class="form-group bmd-form-group">
             <label for="inputQuote" class="bmd-label-floating">Quote</label>
             <input type="text" class="form-control" id="inputQuote">

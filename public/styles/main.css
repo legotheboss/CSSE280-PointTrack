@@ -1,10 +1,18 @@
 body {
-    background: #FFFFFF;
+    background: #2F80ED;
+    font-family: 'Spartan', serif;
+    color: white;
 }
 
 .navbar {
-    font-family: 'Spartan', serif;
-    background-color: #2F80ED;
+    color: #2F80ED;
+    box-shadow: none;
+    background: white;
+}
+
+
+body h1 {
+    text-align: center;
     color: white;
 }
 
@@ -13,7 +21,7 @@ body {
 }
 
 #fab {
-    background: #800000;
+    background: white;
     bottom: 10px;
     color: white;
     position: fixed;
@@ -42,34 +50,38 @@ body {
     left: -128px;
 }
 
-#roselogo {
-    margin: 20px auto;
-    display: block;
-    max-width: 350px;
+.firebaseui-idp-icon-wrapper {
+    display: hide;
 }
 
-#rosefireButton {
+#loginButtons button {
     display: block;
-    margin: 60px auto;
-    color: white;
-    background: #800000;
-    font-size: 1.1em;
+    margin: 30px auto 20px auto;
+    color:  #757575;;
+    background: white;
+    font-size: 14px;
     padding: 10px 30px;
     border-radius: 5px;
 }
 
+.firebaseui-idp-text {
+    font-size: 1.1em;
+    color:  #2F80ED;
+    font-family: 'Spartan', serif;
+}
 
 .bmd-layout-content {
     height: 100vh;
 }
 
 .bmd-layout-drawer>header {
-    background-color: #800000;
-    color: white;
+    background-color: white;
+    color: #2F80ED;
 }
 
 .bmd-layout-drawer>ul {
-    background-color: #ddd;
+    background-color: #2F80ED;
+    color:white;
 }
 
 .list-group-item :first-child {
@@ -78,4 +90,17 @@ body {
 
 #menuEdit, #menuDelete {
     display: none;
+}
+
+
+.material-icons {
+    color: #2F80ED;
+}
+
+.list-group .material-icons {
+    color: white;
+}
+
+.modal-title {
+    color: #2F80ED;
 }

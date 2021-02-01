@@ -1,6 +1,6 @@
 var rhit = rhit || {};
 
-rhit.FB_COLLECTION_MOVIEQUOTE = "MovieQuotes";
+rhit.FB_COLLECTION_MOVIEQUOTE = "pointtrack";
 rhit.FB_KEY_QUOTE = "quote";
 rhit.FB_KEY_MOVIE = "movie";
 rhit.FB_KEY_LAST_TOUCHED = "lastTouched";
@@ -21,11 +21,12 @@ rhit.ListPageController = class {
 	constructor() {
 		document.querySelector("#menuShowMyQuotes").addEventListener("click", (event) => {
 			//console.log("Show only my quotes");
-			window.location.href = `/list.html?uid=${rhit.fbAuthManager.uid}`;
+			window.location.href = `/home.html?uid=${rhit.fbAuthManager.uid}`;
 		});
+
 		document.querySelector("#menuShowAllQuotes").addEventListener("click", (event) => {
 			//console.log("Show all quotes");
-			window.location.href = "/list.html";
+			window.location.href = "/home.html";
 		});
 		document.querySelector("#menuSignOut").addEventListener("click", (event) => {
 			//console.log("Sign out");
@@ -39,6 +40,8 @@ rhit.ListPageController = class {
 			const movie = document.querySelector("#inputMovie").value;
 			rhit.fbMovieQuotesManager.add(quote, movie);
 		});
+
+		
 
 		$("#addQuoteDialog").on("show.bs.modal", (event) => {
 			// Pre animation
@@ -57,6 +60,9 @@ rhit.ListPageController = class {
 
 
 	updateList() {
+
+		document.querySelector("#nameBadge").innerHTML = `Welcome, ${rhit.fbAuthManager._user.displayName}!`;
+
 		console.log("I need to update the list on the page!");
 		console.log(`Num quotes = ${rhit.fbMovieQuotesManager.length}`);
 		console.log("Example quote = ", rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(0));
@@ -188,7 +194,7 @@ rhit.DetailPageController = class {
 		document.querySelector("#submitDeleteQuote").addEventListener("click", (event) => {
 			rhit.fbSingleQuoteManager.delete().then(function () {
 				console.log("Document successfully deleted!");
-				window.location.href = "/list.html";
+				window.location.href = "/home.html";
 			}).catch(function (error) {
 				console.error("Error removing document: ", error);
 			});
@@ -332,7 +338,7 @@ rhit.LoginPageController = class {
 rhit.checkForRedirects = function () {
 	// Redirects
 	if (document.querySelector("#loginPage") && rhit.fbAuthManager.isSignedIn) {
-		window.location.href = "/list.html";
+		window.location.href = "/home.html";
 	}
 	if (!document.querySelector("#loginPage") && !rhit.fbAuthManager.isSignedIn) {
 		window.location.href = "/";
@@ -384,6 +390,20 @@ rhit.main = function () {
 		rhit.checkForRedirects();
 		rhit.initializePage();
 	});
+
+	rhit.startFireBaseUI();
 };
+
+rhit.startFireBaseUI = function() {
+	var uiConfig = {
+        signInSuccessUrl: '/',
+        signInOptions: [
+			firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+		],
+	};
+    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+	ui.start('#loginButtons', uiConfig);
+};
+
 
 rhit.main();
