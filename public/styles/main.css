@@ -1,9 +1,10 @@
 body {
-    background: #DDDDDD;
+    background: #FFFFFF;
 }
 
 .navbar {
-    background-color: #800000;
+    font-family: 'Spartan', serif;
+    background-color: #2F80ED;
     color: white;
 }
 
