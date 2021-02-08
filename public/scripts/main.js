@@ -99,7 +99,7 @@ rhit.ListPageController = class {
 		<div class="card-body">
 			<h5 class="card-title">${eval("accountEnums."+RewardAccount.accountType)}</h5>
 			<h6 class="card-subtitle mb-2 text-muted">${RewardAccount.movie}</h6>
-			<h6 class="card-subtitle mb-2 text-muted">${RewardAccount.quote}</h6>
+			<h6 class="card-subtitle mb-2 text-muted">Last Updated: ${RewardAccount.quote}</h6>
 		</div>
 	</div>`);
 	}
