@@ -347,8 +347,7 @@ rhit.initializePage = function () {
 	// Initialization
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page.");
-		var urlParams = new URLSearchParams(window.location.search);
-		const uid = urlParams.get('uid');
+		const uid = rhit.fbAuthManager.uid;
 		console.log("url parameter = ", uid);
 
 		rhit.fbRewardAccountsManager = new rhit.FbRewardAccountsManager(uid);
