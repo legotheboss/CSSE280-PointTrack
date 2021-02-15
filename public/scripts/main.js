@@ -1,10 +1,11 @@
 var rhit = rhit || {};
 
 rhit.FB_COLLECTION_RewardAccount = "pointtrack";
-rhit.FB_KEY_QUOTE = "quote";
-rhit.FB_KEY_MOVIE = "movie";
+rhit.FB_KEY_LAST_UPDATED = "reward_history";
+rhit.FB_KEY_CUR_BALANCE = "current_balance";
 rhit.FB_KEY_CARD = "accountType";
 rhit.FB_KEY_LAST_TOUCHED = "lastTouched";
+rhit.FB_KEY_BALANCE_HISTORY = "point_history";
 rhit.KEY_UID = "uid";
 rhit.fbRewardAccountsManager = null;
 rhit.fbSingleAccountManager = null;
@@ -27,10 +28,6 @@ rhit.ListPageController = class {
 			window.location.href = `/home.html?uid=${rhit.fbAuthManager.uid}`;
 		});
 
-		document.querySelector("#menuShowAllQuotes").addEventListener("click", (event) => {
-			//console.log("Show all quotes");
-			window.location.href = "/home.html";
-		});
 		document.querySelector("#menuSignOut").addEventListener("click", (event) => {
 			//console.log("Sign out");
 			rhit.fbAuthManager.signOut();
@@ -39,7 +36,7 @@ rhit.ListPageController = class {
 		// document.querySelector("#submitAddQuote").onclick = (event) => {
 		// };
 		document.querySelector("#submitAddQuote").addEventListener("click", (event) => {
-			const quote = document.querySelector("#inputQuote").value;
+			const quote = document.querySelector('#start').valueAsDate;
 			const movie = document.querySelector("#inputMovie").value;
 			const cardAccount = document.querySelector("#account-type").selectedOptions[0].value;
 			rhit.fbRewardAccountsManager.add(quote, movie, cardAccount);
@@ -49,12 +46,12 @@ rhit.ListPageController = class {
 
 		$("#addQuoteDialog").on("show.bs.modal", (event) => {
 			// Pre animation
-			document.querySelector("#inputQuote").value = "";
+			//document.querySelector("#inputQuote").value = "";
 			document.querySelector("#inputMovie").value = "";
 		});
 		$("#addQuoteDialog").on("shown.bs.modal", (event) => {
 			// Post animation
-			document.querySelector("#inputQuote").focus();
+			//document.querySelector("#inputQuote").focus();
 		});
 
 		// Start listening!
@@ -126,8 +123,8 @@ rhit.FbRewardAccountsManager = class {
 	add(quote, movie, cardAccount) {
 		// Add a new document with a generated id.
 		this._ref.add({
-				[rhit.FB_KEY_QUOTE]: quote,
-				[rhit.FB_KEY_MOVIE]: movie,
+				[rhit.FB_KEY_LAST_UPDATED]: quote,
+				[rhit.FB_KEY_CUR_BALANCE]: movie,
 				[rhit.FB_KEY_CARD]: cardAccount,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
 				[rhit.KEY_UID]: rhit.fbAuthManager.uid,
@@ -170,8 +167,8 @@ rhit.FbRewardAccountsManager = class {
 	getRewardAccountAtIndex(index) {
 		const docSnapshot = this._documentSnapshots[index];
 		const mq = new rhit.RewardAccount(docSnapshot.id,
-			docSnapshot.get(rhit.FB_KEY_QUOTE),
-			docSnapshot.get(rhit.FB_KEY_MOVIE),
+			docSnapshot.get(rhit.FB_KEY_LAST_UPDATED),
+			docSnapshot.get(rhit.FB_KEY_CUR_BALANCE),
 			docSnapshot.get(rhit.FB_KEY_CARD));
 		return mq;
 	}
@@ -184,14 +181,14 @@ rhit.DetailPageController = class {
 			rhit.fbAuthManager.signOut();
 		});
 		document.querySelector("#submitEditQuote").addEventListener("click", (event) => {
-			const quote = document.querySelector("#inputQuote").value;
+			//const quote = document.querySelector("#inputQuote").value;
 			const movie = document.querySelector("#inputMovie").value;
 			rhit.fbSingleAccountManager.update(quote, movie);
 		});
 
 		$("#editQuoteDialog").on("show.bs.modal", (event) => {
 			// Pre animation
-			document.querySelector("#inputQuote").value = rhit.fbSingleAccountManager.quote;
+			//document.querySelector("#inputQuote").value = rhit.fbSingleAccountManager.quote;
 			document.querySelector("#inputMovie").value = rhit.fbSingleAccountManager.movie;
 		});
 		$("#editQuoteDialog").on("shown.bs.modal", (event) => {
@@ -247,8 +244,8 @@ rhit.FbSingleAccountManager = class {
 
 	update(quote, movie, cardAccount) {
 		this._ref.update({
-				[rhit.FB_KEY_QUOTE]: quote,
-				[rhit.FB_KEY_MOVIE]: movie,
+				[rhit.FB_KEY_LAST_UPDATED]: quote,
+				[rhit.FB_KEY_CUR_BALANCE]: movie,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
 				[rhit.FB_KEY_CARD]: cardAccount
 			})
@@ -266,11 +263,11 @@ rhit.FbSingleAccountManager = class {
 	}
 
 	get quote() {
-		return this._documentSnapshot.get(rhit.FB_KEY_QUOTE);
+		return this._documentSnapshot.get(rhit.FB_KEY_LAST_UPDATED);
 	}
 
 	get movie() {
-		return this._documentSnapshot.get(rhit.FB_KEY_MOVIE);
+		return this._documentSnapshot.get(rhit.FB_KEY_CUR_BALANCE);
 	}
 
 	get uid() {
