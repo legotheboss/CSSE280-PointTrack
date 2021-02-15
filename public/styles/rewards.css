@@ -10,10 +10,6 @@ body {
     background: white;
 }
 
-#logo-brand .navbar-brand{
-    color: #2F80ED;
-}
-
 
 body h1 {
     text-align: center;
@@ -107,39 +103,5 @@ body h1 {
 }
 
 .modal-title {
-    color: #2F80ED;
-}
-
-#cardQuote{
-    text-align: center;
-    color: white;
-}
-
-#point-balance{
-    border-radius: 25px;
-    width: 200px;
-    height: 100px;
-    display: flex;
-    justify-content:center;
-    align-items: center;
-    background-color: white;
-
-}
-
-.row{
-    justify-content: center;
-    padding: 20px;
-}
-
-.col-xs{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-#cardMovie, #cashValue{
-    font-weight: bolder;
-    text-align: center;
     color: #2F80ED;
 }

@@ -208,8 +208,9 @@ rhit.DetailPageController = class {
 		rhit.fbSingleAccountManager.beginListening(this.updateView.bind(this));
 	}
 	updateView() {
-		document.querySelector("#cardQuote").innerHTML = rhit.fbSingleAccountManager.quote;
-		document.querySelector("#cardMovie").innerHTML = rhit.fbSingleAccountManager.movie;
+		let account = rhit.fbSingleAccountManager.cardAccount;
+		document.querySelector("#cardQuote").innerHTML =  eval("accountEnums."+account);
+		document.querySelector("#cardMovie").innerHTML = rhit.fbSingleAccountManager.movie+" Points";
 		if (rhit.fbSingleAccountManager.uid == rhit.fbAuthManager.uid) {
 			document.querySelector("#menuEdit").style.display = "flex";
 			document.querySelector("#menuDelete").style.display = "flex";
@@ -277,6 +278,8 @@ rhit.FbSingleAccountManager = class {
 	get cardAccount() {
 		return this._documentSnapshot.get(rhit.FB_KEY_CARD);
 	}
+
+	
 
 }
 
