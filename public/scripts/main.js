@@ -14,8 +14,9 @@ rhit.fbSingleAccountManager = null;
 rhit.fbAuthManager = null;
 rhit.fbCashValue = null;
 rhit.chart = null;
+rhit.dpc = null;
 
-const accountEnums = Object.freeze({"amexMR":"American Express Rewards", "citiTYP":"Citi ThankYou", "chaseUMR":"Chase Ultimate Rewards", "boaPR":"Bank of America Premier Rewards", "discoverCR":"Discover Card Rewards"});
+const accountEnums = Object.freeze({"amexMR":"American Express MR", "citiTYP":"Citi ThankYou", "chaseUMR":"Chase UR", "boaPR":"Bank of America Points", "discoverCR":"Discover Points"});
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
 function htmlToElement(html) {
@@ -102,7 +103,7 @@ rhit.ListPageController = class {
 		<div class="card-body">
 			<h5 class="card-title" style="font-size: large;">${eval("accountEnums."+RewardAccount.accountType)}</h5>
 			<h6 class="card-subtitle mb-2 text-muted" style="font-size: medium;">${RewardAccount.current_bal} points</h6>
-			<h6 class="card-subtitle mb-2 text-muted" style="font-size: medium;">Last Updated: ${RewardAccount.last_updated.toDate().toLocaleDateString(
+			<h6 class="card-subtitle mb-2 text-muted" style="font-size: medium;">Last Updated: ${RewardAccount.lastTouched.toDate().toLocaleDateString(
 				'en-us')}</h6>
 		</div>
 	</div>`);
@@ -111,9 +112,9 @@ rhit.ListPageController = class {
 }
 
 rhit.RewardAccount = class {
-	constructor(id, last_updated, current_bal, accountType) {
+	constructor(id, lastTouched, current_bal, accountType) {
 		this.id = id;
-		this.last_updated = last_updated;
+		this.lastTouched = lastTouched;
 		this.current_bal = current_bal;
 		this.accountType = accountType;
 	}
@@ -130,14 +131,21 @@ rhit.FbRewardAccountsManager = class {
 	add(last_updated, cur_balance, cardAccount) {
 		// Add a new document with a generated id.
 		this._ref.add({
-				[rhit.FB_KEY_LAST_UPDATED]: last_updated,
-				[rhit.FB_KEY_CUR_BALANCE]: cur_balance,
 				[rhit.FB_KEY_CARD]: cardAccount,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
 				[rhit.KEY_UID]: rhit.fbAuthManager.uid,
 			})
 			.then(function (docRef) {
 				console.log("Document written with ID: ", docRef.id);
+
+				firebase.firestore().collection(rhit.FB_COLLECTION_RewardAccount+"/"+docRef.id+"/"+rhit.FB_COLLECTION_PointHistory).add({
+					[rhit.FB_KEY_POINTHISTORY_BALANCE]: parseInt(cur_balance),
+					[rhit.FB_KEY_POINTHISTORY_DATE]: last_updated
+				}).then(function (docRef) {
+					console.log("First balance added with ID: ", docRef.id);
+				}).catch(function (error) {
+					console.error("Error adding document: ", error);
+				});
 			})
 			.catch(function (error) {
 				console.error("Error adding document: ", error);
@@ -169,7 +177,7 @@ rhit.FbRewardAccountsManager = class {
 	getRewardAccountAtIndex(index) {
 		const docSnapshot = this._documentSnapshots[index];
 		const mq = new rhit.RewardAccount(docSnapshot.id,
-			docSnapshot.get(rhit.FB_KEY_LAST_UPDATED),
+			docSnapshot.get(rhit.FB_KEY_LAST_TOUCHED),
 			docSnapshot.get(rhit.FB_KEY_CUR_BALANCE),
 			docSnapshot.get(rhit.FB_KEY_CARD));
 		return mq;
@@ -210,65 +218,6 @@ rhit.DetailPageController = class {
 				console.error("Error removing document: ", error);
 			});
 		});
-
-		var ctx = document.getElementById('myChart').getContext('2d');
-		Chart.defaults.global.defaultFontColor='white';
-		rhit.chart = new Chart(ctx, {
-			// The type of chart we want to create
-			type: 'line',
-		
-			// The data for our dataset
-			data: {
-				//labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-				datasets: [{
-					backgroundColor: 'rgb(220, 220, 220)',
-					borderColor: 'rgb(255, 255, 255)',
-					data: [{
-						x: new Date().setDate(15),
-						y: 1
-					}, {
-						t: new Date().setDate(16),
-						y: 5
-					}, {
-						t: new Date().setDate(17),
-						y: 10
-					}],
-				}]
-			},
-
-			options: {
-				legend: {
-					display: false
-				},
-				layout: {
-					padding: {
-						left: 0,
-						right: 0,
-						top: 5,
-						bottom: 5
-					}
-				},
-				scales: {
-					xAxes: [{
-						gridLines: {
-							display:false
-						},
-						type: 'time',
-						time: {
-							unit: 'day'
-						}
-					}],
-					yAxes: [{
-						gridLines: {
-							display:false
-						},
-						display: false   
-					}]
-				}
-			}
-		
-			// Configuration options go here
-		});
 		rhit.fbSingleAccountManager.beginListening(this.updateView.bind(this));
 		rhit.fbCashValue.beginListening(this.updateView.bind(this));
 	}
@@ -291,6 +240,7 @@ rhit.FbSingleAccountManager = class {
 		this._point_balance_ref = this._ref.collection(rhit.FB_COLLECTION_PointHistory);
 		this.point_history = [];
 		this.redemption_methods = [];
+		this.cur_balance = 0;
 	}
 
 	beginListening(changeListener) {
@@ -298,16 +248,26 @@ rhit.FbSingleAccountManager = class {
 			if (doc.exists) {
 				console.log("Document data:", doc.data());
 				this._documentSnapshot = doc;
+				const snapshot = this._point_balance_ref.orderBy("timestamp", "desc").get().then((snapshot) => {
+					this.point_history = snapshot.docs.map(doc => doc.data());
+					this.cur_balance = this.point_history[0].balance;
+				});
 				firebase.firestore().collection("redemptions").doc(this.cardAccount).get().then(
 					(docu) => {
 						this.redemption_methods = docu.data();
 					}
 				)
+				setTimeout(() => { 
+					rhit.fbSingleAccountManager.point_history.forEach((x) => {
+						x.timestamp = x.timestamp.toDate();
+					})
+					rhit.dpc.updateView();
+					rhit.fbCashValue.updateValue();
+					this.generateChart();
+				}, 300);
 				changeListener();
 			} else {
-				// doc.data() will be undefined in this case
 				console.log("No such document!");
-				//window.location.href = "/";
 			}
 		});
 	}
@@ -357,22 +317,77 @@ rhit.FbSingleAccountManager = class {
 		});
 	}
 
-	async updatePointHistory() {
-		const snapshot = await this._point_balance_ref.get();
-		this.point_history = snapshot.docs.map(doc => doc.data());
-		return this.point_history[0];
-	}
-
 	delete() {
 		return this._ref.delete();
 	}
 
-	get last_updated() {
-		return this._documentSnapshot.get(rhit.FB_KEY_LAST_UPDATED);
+	generateChart() {
+		var x = [];
+		var y = [];
+		rhit.fbSingleAccountManager.point_history.forEach((each) => {
+			x.push(each.timestamp);
+			y.push(each.balance);
+		});
+		if(x.length > 2){
+			var ctx = document.getElementById('myChart').getContext('2d');
+			Chart.defaults.global.defaultFontColor='white';
+			rhit.chart = new Chart(ctx, {
+				// The type of chart we want to create
+				type: 'line',
+				// The data for our dataset
+				data: {
+					labels: x,
+					datasets: [{
+						backgroundColor: 'rgb(220, 220, 220)',
+						borderColor: 'rgb(255, 255, 255)',
+						data: y,
+					}]
+				},
+
+				options: {
+					legend: {
+						display: false
+					},
+					layout: {
+						padding: {
+							left: 0,
+							right: 0,
+							top: 5,
+							bottom: 5
+						}
+					},
+					scales: {
+						xAxes: [{
+							gridLines: {
+								display:false
+							},
+							type: 'time',
+							time: {
+								unit: 'day'
+							}
+						}],
+						yAxes: [{
+							gridLines: {
+								display:false
+							},
+							display: false   
+						}]
+					},
+					parsing: {
+						xAxisKey: 'timestamp',
+						yAxisKey: 'balance'
+					},
+				}
+			});
+			document.getElementById("historyMessage").remove();
+		} else {
+			document.getElementById("myChart").remove();
+			document.getElementById("historyMessage").style.visibility = "visible";
+		}
 	}
 
-	get cur_balance() {
-		return this._documentSnapshot.get(rhit.FB_KEY_CUR_BALANCE);
+	get last_updated() {
+		return this._documentSnapshot.get(rhit.FB_KEY_LAST_UPDATED);
 	}
 
 	get uid() {
@@ -413,6 +428,11 @@ rhit.FbCashValue = class {
 
 	getValue(accountType) {
 		return this._documentSnapshot.get("values")[accountType];
+	}
+
+	updateValue() {
+		const cash_equivalent = rhit.fbCashValue.getValue(rhit.fbSingleAccountManager.cardAccount)* rhit.fbSingleAccountManager.cur_balance;
+		document.querySelector("#cashValue").innerHTML = "$" + cash_equivalent.toFixed(2);
 	}
 }
 
@@ -500,7 +520,7 @@ rhit.initializePage = function () {
 		}
 		rhit.fbSingleAccountManager = new rhit.FbSingleAccountManager(RewardAccountId);
 		rhit.fbCashValue = new rhit.FbCashValue();
-		new rhit.DetailPageController();
+		rhit.dpc = new rhit.DetailPageController();
 	}
 
 	if (document.querySelector("#loginPage")) {
