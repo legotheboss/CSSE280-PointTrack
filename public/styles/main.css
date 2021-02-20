@@ -42,6 +42,10 @@ body h1 {
     margin: 20px 0;
 }
 
+.card-title {
+    font-size:2.5vmin;
+}
+
 #listPage .card-title,
 #listPage .card-subtitle {
     color: #6c757d;
@@ -97,9 +101,9 @@ body h1 {
     display: none;
 }
 
-
 .material-icons {
     color: #2F80ED;
+    font-size:medium;
 }
 
 .list-group .material-icons {
@@ -108,11 +112,6 @@ body h1 {
 
 .modal-title {
     color: #2F80ED;
-}
-
-#cardQuote{
-    text-align: center;
-    color: white;
 }
 
 #point-balance{
@@ -142,4 +141,5 @@ body h1 {
     font-weight: bolder;
     text-align: center;
     color: #2F80ED;
+    margin: 0px;
 }
