@@ -143,3 +143,29 @@ body h1 {
     color: #2F80ED;
     margin: 0px;
 }
+
+.ul .h5{
+    color: #2F80ED;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.redeem-icon{
+    padding-left: 13px;
+    vertical-align: middle;
+    font-size: xx-large;
+    text-align: center;
+    color: #2F80ED;
+}
+
+@media (max-width: 576px) {
+    .navbar-brand{
+        font-size: small;
+    }
+}
+
+@media (min-width: 576px) {
+    .navbar-brand{
+        font-size: larger;
+    }
+}
