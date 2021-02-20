@@ -317,12 +317,14 @@ rhit.FbSingleAccountManager = class {
 		}
 	
 		_createCard(value, redem_type) {
+			var num = value*rhit.fbSingleAccountManager.cur_balance;
+			num = num.toFixed(2);
 			return htmlToElement(`
 			<div class="row">
 			<div class="col-xs">
 				<div class="rectangle" id="point-balance">
 				<i class="material-icons redeem-icon">${redem_type}</i>
-					<span style="color: #2F80ED; padding-left: 10px;">$${value*rhit.fbSingleAccountManager.cur_balance}</span>
+					<span style="color: #2F80ED; padding-left: 10px;">$${num}</span>
 				</div>
 			</div>
 			</div>`)
