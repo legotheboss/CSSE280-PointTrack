@@ -300,7 +300,8 @@ rhit.FbSingleAccountManager = class {
 				this._documentSnapshot = doc;
 				firebase.firestore().collection("redemptions").doc(this.cardAccount).get().then(
 					(docu) => {
-						this.redemption_methods = docu.data();
+						this.redemption_methods = new Map(Object.entries(docu.data()));
+						this.redemptionMethods();
 					}
 				)
 				changeListener();
@@ -331,6 +332,51 @@ rhit.FbSingleAccountManager = class {
 				console.error("Error updating document: ", error);
 			});
 	}
+
+	redemptionMethods(){
+			// Make a new redemptionMethodContainer
+			console.log(rhit.fbSingleAccountManager.cur_balance);
+			const newList = htmlToElement('<div id="redemptionMethodContainer"></div>');
+			this.redemption_methods.forEach((value, redem_type) => {
+				const newCard = this._createCard(value, redem_type);
+				// newCard.onclick = (event) => {
+				// 	//console.log(`You clicked on ${mq.id}`);
+				// 	// rhit.storage.setRewardAccountId(mq.id);
+				// 	window.location.href = `/RewardAccount.html?id=${mq.id}`;
+				// };
+				newList.appendChild(newCard);
+			})
+	
+	
+			// Remove the old redemptionMethodContainer
+			const oldList = document.querySelector("#redemptionMethodContainer");
+			oldList.removeAttribute("id");
+			oldList.hidden = true;
+			// Put in the new redemptionMethodContainer
+			oldList.parentElement.appendChild(newList);
+		}
+	
+		_createCard(value, redem_type) {
+			return htmlToElement(`<div class="row">
+			<div class="col-xs">
+			  <div class="rectangle" id="point-balance">
+   				<i class="material-icons redeem-icon">${redem_type}</i>
+				   <span style="
+				   color: #2F80ED;
+				   padding-left: 10px;
+			   ">$${value*rhit.fbSingleAccountManager.cur_balance}</span>
+			  </div>
+			  </div>
+			</div>`)
+
+		// 	return htmlToElement(`<div class="card">
+		// 	<div class="card-body">
+		// 		<i class="material-icons">${redem_type}</i> <span class="card-title" style="font-size: large;">${value}</span>
+		// 	</div>
+		// </div>`);
+	}
+
+	
 
 	addDatapoint(date, balance) {
 		// Add a new document with a generated id.
