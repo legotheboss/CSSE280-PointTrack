@@ -157,3 +157,15 @@ body h1 {
     text-align: center;
     color: #2F80ED;
 }
+
+@media (max-width: 576px) {
+    .navbar-brand{
+        font-size: small;
+    }
+}
+
+@media (min-width: 576px) {
+    .navbar-brand{
+        font-size: larger;
+    }
+}
