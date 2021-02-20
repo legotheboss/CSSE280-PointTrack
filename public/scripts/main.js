@@ -366,6 +366,7 @@ rhit.FbSingleAccountManager = class {
 				// The document probably doesn't exist.
 				console.error("Error updating document: ", error);
 			});
+			this.generateChart();
 		}
 	}
 
@@ -377,16 +378,14 @@ rhit.FbSingleAccountManager = class {
 		var x = [];
 		var y = [];
 		rhit.fbSingleAccountManager.point_history.forEach((each) => {
-			x.push(each.timestamp);
+			x.push(moment(each.timestamp));
 			y.push(each.balance);
 		});
 		if(x.length > 1){
 			var ctx = document.getElementById('myChart').getContext('2d');
 			Chart.defaults.global.defaultFontColor='white';
 			rhit.chart = new Chart(ctx, {
-				// The type of chart we want to create
 				type: 'line',
-				// The data for our dataset
 				data: {
 					labels: x,
 					datasets: [{
@@ -395,7 +394,6 @@ rhit.FbSingleAccountManager = class {
 						data: y,
 					}]
 				},
-
 				options: {
 					legend: {
 						display: false
@@ -415,7 +413,11 @@ rhit.FbSingleAccountManager = class {
 							},
 							type: 'time',
 							time: {
-								unit: 'day'
+								tooltipFormat:'MM/DD/YYYY',
+								displayFormats: {
+									week: 'll'
+								}
+								
 							}
 						}],
 						yAxes: [{
@@ -429,11 +431,14 @@ rhit.FbSingleAccountManager = class {
 						xAxisKey: 'timestamp',
 						yAxisKey: 'balance'
 					},
+					tooltip:{
+						enabled: true,
+
+					}
 				}
 			});
-			if(document.getElementById("historyMessage")) {
-				document.getElementById("historyMessage").remove();
-			}
+			document.getElementById("historyMessage").style.visibility = "hidden";
+			document.getElementById("myChart").style.visibility = "visible";
 		} else {
 			document.getElementById("myChart").style.visibility = "hidden";
 			document.getElementById("historyMessage").style.visibility = "visible";
@@ -469,9 +474,7 @@ rhit.FbCashValue = class {
 				document.querySelector("#cashValue").innerHTML = "$" + cash_equivalent.toFixed(2);
 				changeListener();
 			} else {
-				// doc.data() will be undefined in this case
 				console.log("No such document!");
-				//window.location.href = "/";
 			}
 		});
 	}
