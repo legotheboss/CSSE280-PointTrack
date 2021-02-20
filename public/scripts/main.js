@@ -134,6 +134,7 @@ rhit.FbRewardAccountsManager = class {
 				[rhit.FB_KEY_CARD]: cardAccount,
 				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
 				[rhit.KEY_UID]: rhit.fbAuthManager.uid,
+				[rhit.FB_KEY_CUR_BALANCE]: cur_balance
 			})
 			.then(function (docRef) {
 				console.log("Document written with ID: ", docRef.id);
@@ -341,17 +342,29 @@ rhit.FbSingleAccountManager = class {
 			.catch(function (error) {
 				console.error("Error adding document: ", error);
 			});
-		
-		this._ref.update({
-			[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
-		})
-		.then(() => {
-			console.log("Document successfully updated!");
-		})
-		.catch(function (error) {
-			// The document probably doesn't exist.
-			console.error("Error updating document: ", error);
-		});
+
+		if(date < new Date()) {
+			this._ref.update({
+				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
+			}).then(() => {
+				console.log("Document successfully updated!");
+			})
+			.catch(function (error) {
+				// The document probably doesn't exist.
+				console.error("Error updating document: ", error);
+			});
+		} else {
+			this._ref.update({
+				[rhit.FB_KEY_LAST_TOUCHED]: firebase.firestore.Timestamp.now(),
+				[rhit.FB_KEY_CUR_BALANCE]: balance
+			}).then(() => {
+				console.log("Document successfully updated!");
+			})
+			.catch(function (error) {
+				// The document probably doesn't exist.
+				console.error("Error updating document: ", error);
+			});
+		}
 	}
 
 	delete() {
@@ -365,7 +378,7 @@ rhit.FbSingleAccountManager = class {
 			x.push(each.timestamp);
 			y.push(each.balance);
 		});
-		if(x.length > 2){
+		if(x.length > 1){
 			var ctx = document.getElementById('myChart').getContext('2d');
 			Chart.defaults.global.defaultFontColor='white';
 			rhit.chart = new Chart(ctx, {
@@ -420,7 +433,7 @@ rhit.FbSingleAccountManager = class {
 				document.getElementById("historyMessage").remove();
 			}
 		} else {
-			document.getElementById("myChart").remove();
+			document.getElementById("myChart").style.visibility = "hidden";
 			document.getElementById("historyMessage").style.visibility = "visible";
 		}
 	}
