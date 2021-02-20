@@ -295,7 +295,6 @@ rhit.FbSingleAccountManager = class {
 
 	redemptionMethods(){
 			// Make a new redemptionMethodContainer
-			console.log(rhit.fbSingleAccountManager.cur_balance);
 			const newList = htmlToElement('<div id="redemptionMethodContainer"></div>');
 			this.redemption_methods.forEach((value, redem_type) => {
 				const newCard = this._createCard(value, redem_type);
@@ -317,23 +316,15 @@ rhit.FbSingleAccountManager = class {
 		}
 	
 		_createCard(value, redem_type) {
-			return htmlToElement(`<div class="row">
+			return htmlToElement(`
+			<div class="row">
 			<div class="col-xs">
-			  <div class="rectangle" id="point-balance">
-   				<i class="material-icons redeem-icon">${redem_type}</i>
-				   <span style="
-				   color: #2F80ED;
-				   padding-left: 10px;
-			   ">$${value*rhit.fbSingleAccountManager.cur_balance}</span>
-			  </div>
-			  </div>
+				<div class="rectangle" id="point-balance">
+				<i class="material-icons redeem-icon">${redem_type}</i>
+					<span style="color: #2F80ED; padding-left: 10px;">$${value*rhit.fbSingleAccountManager.cur_balance}</span>
+				</div>
+			</div>
 			</div>`)
-
-		// 	return htmlToElement(`<div class="card">
-		// 	<div class="card-body">
-		// 		<i class="material-icons">${redem_type}</i> <span class="card-title" style="font-size: large;">${value}</span>
-		// 	</div>
-		// </div>`);
 	}
 
 	
@@ -425,7 +416,9 @@ rhit.FbSingleAccountManager = class {
 					},
 				}
 			});
-			document.getElementById("historyMessage").remove();
+			if(document.getElementById("historyMessage")) {
+				document.getElementById("historyMessage").remove();
+			}
 		} else {
 			document.getElementById("myChart").remove();
 			document.getElementById("historyMessage").style.visibility = "visible";
